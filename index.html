@@ -6,28 +6,91 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cube</title>
+    
 </head>
 <style>
     * {
         padding: 0;
         margin: 0;
-        overflow-y: hidden;
+    }
+
+    body {
+        /* background: linear-gradient(to bottom, #219c84 0%, #b37fcf 50%, #ac68d1 100%); */
+        /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        font-family: "Arial";
+        background: linear-gradient(to left, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+    }
+
+    .webgl {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: -1;
+    }
+
+    /* main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+    } */
+
+    .intro {
+        display: flex;
+        flex-direction: column;
+        color: black;
+        background: linear-gradient(to right bottom,
+                rgba(255, 255, 255, 0.7),
+                rgba(255, 255, 255, 0.3));
+
+        backdrop-filter: blur(1em);
+        width: fit-content;
+        height: fit-content;
+        padding: 2em;
+        border-radius: 3em;
+    }
+
+    .intro h3 {
+        margin-top: 1em;
+    }
+
+    .icon-btn {
+        height: 2em;
+        width: 2em;
+        border-radius: 50%;
+
     }
 </style>
 
 <body>
-
-    <canvas></canvas>
+    <main>
+        <button id="view-change">change view</button>
+        <!-- <div class="intro">
+            <h1>
+                Hi, I'm Mrinal Bhattacharya
+            </h1>
+            <h3>
+                A full-stack developer based in India.
+            </h3>
+        </div> -->
+    </main>
+    <canvas class="webgl"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+        crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"
         integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <script src="index.js" type="module"></script>
+        crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"
+        integrity="sha512-eP6ippJojIKXKO8EPLtsUMS+/sAGHGo1UN/38swqZa1ypfcD4I0V/ac5G3VzaHfDaklFmQLEs51lhkkVaqg60Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+    <script src="3d.js" type="module" defer></script>
+    <script src="content.js" defer></script>
+    <script src="animations.js" defer></script>
 </body>
 
 </html>
