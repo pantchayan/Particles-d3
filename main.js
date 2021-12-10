@@ -30,8 +30,8 @@ window.addEventListener("resize", () => {
 // TEXTURES LOADER
 
 let textureLoader = new THREE.TextureLoader();
-let particlesTexture = textureLoader.load("./assets/textures/star_01.png");
-let shadowTexture = textureLoader.load("./assets/textures/simpleShadow.jpg");
+let particlesTexture = textureLoader.load("https://raw.githubusercontent.com/pantchayan/threejs-portfolio/master/assets/textures/star_01.png");
+let shadowTexture = textureLoader.load("https://raw.githubusercontent.com/pantchayan/threejs-portfolio/master/assets/textures/simpleShadow.jpg");
 
 // SCENE
 const scene = new THREE.Scene();
