@@ -30,8 +30,8 @@ window.addEventListener("resize", () => {
 // TEXTURES LOADER
 
 let textureLoader = new THREE.TextureLoader();
-let particlesTexture = textureLoader.load("/assets/textures/star_01.png");
-let shadowTexture = textureLoader.load("/assets/textures/simpleShadow.jpg");
+let particlesTexture = textureLoader.load("./assets/textures/star_01.png");
+let shadowTexture = textureLoader.load("./assets/textures/simpleShadow.jpg");
 
 // SCENE
 const scene = new THREE.Scene();
@@ -298,10 +298,6 @@ document.body.onscroll = () => {
       ((document.documentElement.scrollHeight || document.body.scrollHeight) -
         document.documentElement.clientHeight)) *
     100;
-  // document.getElementById("scrollProgress").innerText =
-  //   "Scroll Progress : " + scrollPercent.toFixed(2);
-
-  console.log("scrolled", scrollPercent);
 };
 
 let viewNum = 0;
