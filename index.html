@@ -6,76 +6,130 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cube</title>
-    
+    <link rel="stylesheet" href="style.css">
 </head>
 <style>
-    * {
-        padding: 0;
-        margin: 0;
-    }
-
-    body {
-        /* background: linear-gradient(to bottom, #219c84 0%, #b37fcf 50%, #ac68d1 100%); */
-        /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-        font-family: "Arial";
-        background: linear-gradient(to left, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
-    }
-
-    .webgl {
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: -1;
-    }
-
-    /* main {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-
-        align-items: center;
-        width: 100vw;
-        height: 100vh;
-    } */
-
-    .intro {
-        display: flex;
-        flex-direction: column;
-        color: black;
-        background: linear-gradient(to right bottom,
-                rgba(255, 255, 255, 0.7),
-                rgba(255, 255, 255, 0.3));
-
-        backdrop-filter: blur(1em);
-        width: fit-content;
-        height: fit-content;
-        padding: 2em;
-        border-radius: 3em;
-    }
-
-    .intro h3 {
-        margin-top: 1em;
-    }
-
-    .icon-btn {
-        height: 2em;
-        width: 2em;
-        border-radius: 50%;
-
-    }
 </style>
 
 <body>
     <main>
-        <button id="view-change">change view</button>
-        <!-- <div class="intro">
-            <h1>
-                Hi, I'm Mrinal Bhattacharya
-            </h1>
-            <h3>
-                A full-stack developer based in India.
-            </h3>
-        </div> -->
+        <button id="prev-view">prev view</button>
+        <button id="next-view">next view</button>
+        <div class="intro-container">
+            <div class="intro">
+                <h1>
+                    Hello!
+                    <img src="https://bchiang7.github.io/img/emojis/wave.png" height="35" width="35" alt="">
+                </h1>
+                <h2>
+                    I'm <span>Chayan Pant</span>,
+                </h2>
+                <h3>
+                    A design-minded front-end software engineer focused on building beautiful
+                    interfaces & experiences 💻
+                </h3>
+            </div>
+        </div>
+        <div class="about-container container">
+            <div class="about">
+                <h2>
+                    Background 🌐
+                </h2>
+                <h4>
+                    I'm currently a Product Engineer and Mentor at <span>Pepcoding 🚀</span> building things for the web
+                    with some awesome people. I am also an undergrad pursuing CSE from <span>Bennett University</span>.
+                </h4>
+                <h4>
+                    As a software engineer, I enjoy bridging the gap between engineering and design — combining my
+                    technical knowledge with my keen eye for design to create a beautiful product. My goal is to always
+                    build applications that are scalable and efficient under the hood while providing engaging,
+                    pixel-perfect user experiences.
+                </h4>
+            </div>
+        </div>
+        <div class="projects-container container">
+            <div class="projects">
+                <h2>
+                    Projects 🏆
+                </h2>
+                <h4>
+                    <ul>
+                        <li> <span> Seeker's Deck: </span>
+                            A job application tracker which manages it all at one place.
+                        </li>
+                        <li> <span> Google Fit UI Clone: </span>
+                            Cloned one of the most popular Fitness application in world using D3.js.</li>
+                        <li> <span> Football Game: </span>
+                            Flappy bird inspired game but with football and squares.
+                            Play @ pantchayan.github.io/football-game</li>
+                        <li> <span> Investment Portfolio Tracker: </span>
+                            Manages all your riches, so you never go broke.</li>
+                        <li> <span> Microsoft Whiteboard: </span>
+                            Cloned the whiteboard, made it usable, check it out @ pantchayan.github.io/whiteboard-clone
+                        </li>
+                        <li> <span> Google Sheet's Clone: </span>
+                            Again a clone. nvm.</li>
+
+                    </ul>
+                </h4>
+            </div>
+        </div>
+        <div class="skills-container container">
+            <div class="skills">
+                <h2>
+                    Skills 🧠
+                </h2>
+                <h4>
+                    <ul>
+                        <li> <span> Languages and Databases </span>
+                            <br>
+                            Javascript, Java, MySQL, Mongo DB
+                        </li>
+                        <li> <span> Scripting and Styling </span>
+                            <br>
+                            HTML5, CSS, Bootstrap, MaterialUI, TailwindCSS, FlexBox
+                        </li>
+                        <li> <span> Frameworks and Libraries </span>
+                            <br>
+                            React, Node.js, Three.js, D3.js
+                        </li>
+                        </li>
+                        <li> <span> Other </span>
+                            <br>
+                            Git, Firebase
+                        </li>
+                    </ul>
+                </h4>
+            </div>
+        </div>
+        <div class="contact-container container">
+            <div class="contact">
+                <h2>
+                    Contact ☎️
+                </h2>
+                <h4>
+                    <ul>
+                        <li> <span> Phone/ WhatsApp </span>
+                            <br>
+                            +9195xxxx8433
+                        </li>
+                        <li> <span> Email </span>
+                            <br>
+                            xxkc@gmail.com
+                        </li>
+                        <li> <span> Github </span>
+                            <br>
+                            @pantchayan
+                        </li>
+                        </li>
+                        <li> <span> LinkedIn </span>
+                            <br>
+                            @pantchayan
+                        </li>
+                    </ul>
+                </h4>
+            </div>
+        </div>
     </main>
     <canvas class="webgl"></canvas>
 
@@ -88,9 +142,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"
         integrity="sha512-eP6ippJojIKXKO8EPLtsUMS+/sAGHGo1UN/38swqZa1ypfcD4I0V/ac5G3VzaHfDaklFmQLEs51lhkkVaqg60Q=="
         crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
-    <script src="3d.js" type="module" defer></script>
+    <script src="main.js" type="module" defer></script>
     <script src="content.js" defer></script>
-    <script src="animations.js" defer></script>
 </body>
 
 </html>
