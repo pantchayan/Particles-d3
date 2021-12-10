@@ -442,5 +442,3 @@ setInterval(() => {
 
 window.scrollTo({ top: 0, behavior: 'smooth' })
 animate();
-
-// directionalLight.color = new THREE.Color(0x00ff00)

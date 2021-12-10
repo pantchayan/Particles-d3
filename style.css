@@ -4,7 +4,7 @@
 }
 
 body {
-  /* background: linear-gradient(to bottom, #219c84 0%, #b37fcf 50%, #ac68d1 100%); */
+  /* background: linear-gradient(to left, #219c84 0%, #b37fcf 50%, #ac68d1 100%); */
   /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   font-family: "Arial";
   background: linear-gradient(to left, #ff3cac 0%, #784ba0 50%, #2b86c5 100%);
@@ -15,6 +15,10 @@ body {
   left: 0;
   top: 0;
   z-index: -1;
+  
+  /* mix-blend-mode:lighten; */
+  /* mix-blend-mode: luminosity; */
+  /* mix-blend-mode: hard-light; */
 }
 
 .container {
