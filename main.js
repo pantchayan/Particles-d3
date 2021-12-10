@@ -124,7 +124,7 @@ scene.add(clouds);
 // PLANE
 const geometry = new THREE.PlaneGeometry(100, 15);
 const material = new THREE.MeshBasicMaterial({
-  color: new THREE.Color("#ffddff"), // #eeeeee
+  color: new THREE.Color("#222"), // #ffddff
   transparent: true,
   side: THREE.DoubleSide,
 });
