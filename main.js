@@ -78,12 +78,12 @@ scene.add(mainObject);
 //
 // GSAP CODE - to animate the outer-wireframe object as the page loads
 //
-outerObject.scale.set(1.25, 1.25, 1.25);
-// setTimeout(() => {
-//   gsap.to(outerObject.scale, { x: 1.25, y: 1.25, z: 1.25, duration: 1 });
-// }, 2500);
+outerObject.scale.set(0, 0, 0);
+setTimeout(() => {
+  gsap.to(outerObject.scale, { x: 1.25, y: 1.25, z: 1.25, duration: 1 });
+}, 2500);
 
-// gsap.to(outerObject.scale, { x: 1.75, y: 1.75, z: 1.75, duration: 2.5 });
+gsap.to(outerObject.scale, { x: 1.75, y: 1.75, z: 1.75, duration: 2.5 });
 
 //
 // RESIZING MAINOBJECT IF SCREEN IS SMALL
@@ -187,7 +187,7 @@ let particlesCount = 1500;
 let particlePositionsArr = new Float32Array(particlesCount * 3);
 
 for (let i = 0; i < particlesCount * 3; i++) {
-  particlePositionsArr[i] = (Math.random() - 0.5) * 10;
+  particlePositionsArr[i] = (Math.random() - 0.5) * 15;
 }
 
 backgroundParticlesGeometry.setAttribute(
@@ -198,7 +198,7 @@ backgroundParticlesGeometry.setAttribute(
 let backgroundParticlesMaterial = new THREE.PointsMaterial();
 backgroundParticlesMaterial.wireframe = true;
 backgroundParticlesMaterial.size = 0.15;
-// backgroundParticlesMaterial.sizeAttenuation = true;
+backgroundParticlesMaterial.sizeAttenuation = true;
 backgroundParticlesMaterial.transparent = true;
 backgroundParticlesMaterial.alphaMap = particlesTexture;
 backgroundParticlesMaterial.depthWrite = false;
@@ -256,14 +256,15 @@ scene.add(hemisphereLight);
 
 //
 // HANDLING MOUSE MOVE 
+// Associated variables are useful for making particles react to mousemove (handled in animate function)
 //
 let mouseX = 0;
 let mouseY = 0;
 
 let onDocumentMouseMove = (event) => {
   // Scaling from - to +
-  mouseX = event.clientX - (sizes.width/2);
-  mouseY = event.clientY - (sizes.height/2);
+  mouseX = event.clientX - (sizes.width / 2);
+  mouseY = event.clientY - (sizes.height / 2);
 };
 document.addEventListener("mousemove", onDocumentMouseMove);
 
@@ -271,7 +272,7 @@ document.addEventListener("mousemove", onDocumentMouseMove);
 // ANIMATE FUNCTION - 
 // Handles MainObject, CloudsMesh and BackgroundParticles Animation
 //
-let transitionHappening = false; // What do you do : Keep a track of whether a transition is happening or not, and make camera look at the object if yes
+let cameraLookAtObjectFlag = false; // What do you do : Keep a track of whether a transition is happening or not, and make camera look at the object if yes
 let mainObjectRotationToggleFlag = true; // What do you do : Toggles Rotation from left to right
 
 const clock = new THREE.Clock();
@@ -282,7 +283,7 @@ let animate = () => {
   mainObject.position.y = (1 + Math.sin(elapsedTime)) * 0.25;
 
   // Main object's y position will serve as a factor to accelerate rotation
-  let factor = mainObject.position.y/4;
+  let factor = mainObject.position.y / 4;
 
   // factor value can further be adjusted to speed up/slow down the spin
   if (mainObject.position.y > 0.5) {
@@ -310,7 +311,7 @@ let animate = () => {
   // background particles animation on x-z plane
   backgroundParticles.rotation.z += 0.002;
   backgroundParticles.rotation.x += 0.002;
-  
+
   // backgroundParticles.position.x = Math.sin(elapsedTime * 0.5)*1;
   // backgroundParticles.position.y = Math.cos(elapsedTime * 0.5)*1;
 
@@ -320,9 +321,12 @@ let animate = () => {
   backgroundParticles.rotation.y += 0.25 * (targetX - backgroundParticles.rotation.y);
   backgroundParticles.rotation.x += 0.25 * (targetY - backgroundParticles.rotation.x);
 
-  if (transitionHappening) {
+  // The below flag is set to true during animation of view 1, 2, & 3 (false for 0 and 4)
+  if (cameraLookAtObjectFlag) {
     camera.lookAt(mainObject.position);
-  } 
+  }
+
+
   cloudsMesh.position.x = Math.sin(elapsedTime * 0.5);
   cloudsMesh.position.z = Math.cos(elapsedTime * 0.1);
 
@@ -331,54 +335,83 @@ let animate = () => {
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
-document.addEventListener("mousewheel", (e) => {
-  // camera.position.z -= e.deltaY * 0.001;
-});
 
-let scrollPercent = 0;
+//
+// UTILITY VARIABLES REQUIRED FOR THE ANIMATION SYSTEM BASED ON SCROLL
+//
+// currViewNum -> Num value of the view that is being animated/ has just been animated
+// nextRequestingView -> Num value determining the latest requested view for animation
+// viewAnimatingFlag -> Boolean value determing whether a view is currently being animated or not.
+//
+let currViewNum = 0;
+let nextRequestingView = -1;
+let viewAnimatingFlag = false;
 
-document.body.onscroll = () => {
+//
+// SCROLL EVENTLISTENER 
+// Updates scrollPercent and calls listenScroll
+// scrollPercent -> Num value that represents % of part of the page that user is in, updates whenever user scrolls
+//
+window.addEventListener('scroll', (event) => {
   //calculate the current scroll progress as a percentage
+  let scrollPercent = 0;
   scrollPercent =
     ((document.documentElement.scrollTop || document.body.scrollTop) /
       ((document.documentElement.scrollHeight || document.body.scrollHeight) -
         document.documentElement.clientHeight)) *
     100;
-};
 
-let viewNum = 0;
-document.getElementById("next-view").addEventListener("click", (e) => {
-  viewNum = (viewNum + 1) % 5;
-  switchAnimation();
+  listenScroll(scrollPercent)
 });
 
-document.getElementById("prev-view").addEventListener("click", (e) => {
-  viewNum = viewNum > 0 ? Math.abs((viewNum - 1) % 5) : -1;
-  if (viewNum != -1) {
-    switchAnimation();
-  } else {
-    viewNum = 0;
+
+//
+// The below functions manage state of viewAnimatingFlag, and being called by ANIMATION FUNCTIONS. 
+// viewAnimationEnd also sends request to animate a new view that has latest request, managed by nextRequestingView. 
+// nextRequestingView is updated in switchAnimationRequest
+//
+let viewAnimationStart = () => {
+  // console.log('Animation started for ', currViewNum);
+  viewAnimatingFlag = true;
+}
+let viewAnimationEnd = () => {
+  // console.log('Animation ended', currViewNum);
+  viewAnimatingFlag = false;
+  if (nextRequestingView != -1) {
+    // console.log('ANIMATING THE REQUESTED VIEW')
+    switchAnimationRequest(nextRequestingView);
+    nextRequestingView = -1;
   }
-});
+}
 
+// 
+// ANIMATION FUNCTIONS FOR ALL THE VIEWS. (Called from/ Handled by switchAnimationRequest)
+//
+// These use GSAP's gsap.to() function with parameter of onCompleted and onStart.
+//
+// onStart triggers -> viewAnimationStart func. when tween starts
+// onCompleted triggers -> viewAnimationEnd func. when tween ends
+//
+// There are also duration and delay parameters being used. 
+//
 let animateView0 = () => {
-  gsap.to(camera.position, { y: 1, x: 0, z: 7 });
+  gsap.to(camera.position, { y: 1, x: 0, z: 7, onStart: viewAnimationStart });
   camera.rotation.set(0, 0, 0);
   setTimeout(() => {
     innerObject.geometry = new THREE.IcosahedronGeometry(1, 1);
 
-    gsap.to(innerObject.scale, { x: 1, y: 1, z: 1, duration: 1 });
+    gsap.to(innerObject.scale, { x: 1, y: 1, z: 1, duration: 1, onComplete: viewAnimationEnd });
     gsap.to(camera.position, { x: -2 });
-    transitionHappening = false;
+    cameraLookAtObjectFlag = false;
   }, 1000);
   gsap.to(innerObject.scale, { x: 0, y: 0, z: 0, duration: 1 });
 };
 
 let animateView1 = () => {
-  transitionHappening = true;
-  gsap.to(camera.position, { y: 8, x: 1, z: 0 });
+  cameraLookAtObjectFlag = true;
+  gsap.to(camera.position, { y: 8, x: 1, z: 0, ease: "circ.out", onStart: viewAnimationStart });
 
-  gsap.to(camera.position, { y: 5, x: 0, z: 3, delay: 1, duration: 1 });
+  gsap.to(camera.position, { y: 5, x: 0, z: 3, delay: 1, duration: 1, ease: "circ.out", onComplete: viewAnimationEnd });
 
   setTimeout(() => {
     innerObject.geometry = new THREE.TorusGeometry(0.75, 0.2, 16, 100);
@@ -386,17 +419,12 @@ let animateView1 = () => {
     gsap.to(innerObject.scale, { x: 1, y: 1, z: 1, duration: 1 });
   }, 1000);
   gsap.to(innerObject.scale, { x: 0, y: 0, z: 0, duration: 1 });
-
-  // hemisphereLight.color = new THREE.Color(0xff0000)
-  // hemisphereLight.groundColor = new THREE.Color(0xff00ff)
-  // console.log(directionalLight, hemisphereLight) // groundColor
-  // console.log(directionalLight.color, hemisphereLight.color)
 };
 
 let animateView2 = () => {
-  transitionHappening = true;
-  gsap.to(camera.position, { y: 5, x: 0, z: -6 });
-  gsap.to(camera.position, { y: 1, x: 0, z: -3, delay: 1, duration: 1 });
+  cameraLookAtObjectFlag = true;
+  gsap.to(camera.position, { y: 5, x: 0, z: -6, onStart: viewAnimationStart });
+  gsap.to(camera.position, { y: 1, x: 0, z: -3, delay: 1, duration: 1, onComplete: viewAnimationEnd });
 
   setTimeout(() => {
     innerObject.geometry = new THREE.SphereGeometry(
@@ -412,14 +440,12 @@ let animateView2 = () => {
     gsap.to(innerObject.scale, { x: 1, y: 1, z: 1, duration: 1 });
   }, 1000);
   gsap.to(innerObject.scale, { x: 0, y: 0, z: 0, duration: 1 });
-  // gsap.to(camera.position, { y: 3, x: 2, z: 0 });
-  // gsap.to(camera.position, { y: 1, x: 7, z: 0, delay: 1, duration:1 });
 };
 
 let animateView3 = () => {
-  transitionHappening = true;
-  gsap.to(camera.position, { y: 2, x: -1.3, z: 2 });
-  gsap.to(camera.position, { y: 1, x: -2, z: 5, delay: 1, duration: 1 });
+  cameraLookAtObjectFlag = true;
+  gsap.to(camera.position, { y: 2, x: -1.3, z: 2, onStart: viewAnimationStart });
+  gsap.to(camera.position, { y: 1, x: -2, z: 5, delay: 1, duration: 1, onComplete: viewAnimationEnd });
 
   setTimeout(() => {
     innerObject.geometry = new THREE.OctahedronGeometry(1, 1);
@@ -430,21 +456,42 @@ let animateView3 = () => {
 };
 
 let animateView4 = () => {
-  gsap.to(camera.position, { y: 1, x: 0, z: 7 });
+  gsap.to(camera.position, { y: 1, x: 0, z: 7, onStart: viewAnimationStart });
 
   setTimeout(() => {
     innerObject.geometry = new THREE.IcosahedronGeometry(1, 1);
 
-    gsap.to(innerObject.scale, { x: 1, y: 1, z: 1, duration: 1 });
+    gsap.to(innerObject.scale, { x: 1, y: 1, z: 1, duration: 1, onComplete: viewAnimationEnd });
 
-    transitionHappening = false;
+    cameraLookAtObjectFlag = false;
 
     gsap.to(camera.position, { y: 1, x: 2, z: 7 });
   }, 1500);
   gsap.to(innerObject.scale, { x: 0, y: 0, z: 0, duration: 1 });
 };
 
-let switchAnimation = () => {
+//
+// FUNCTION RESPONSIBLE FOR TRIGGERING ANIMATION FUNCTIONS AFTER CHECKING. (Called from listenScroll)
+//
+let switchAnimationRequest = (viewNum) => {
+  // console.log('Requested to switch to ', viewNum);
+
+  // Checks if a redundant request is made for the current view. 
+  // EDIT: Now the check is being made proactively. Not reactively. 
+  // if (currViewNum === viewNum) {
+  //   console.log('Blocked -> IN THE SAME VIEW')
+  //   return;
+  // }
+
+  // Checks if a view is currently under animation. Utilising viewAnimatingFlag. (boolean: true if yes)
+  // Updates the requested view to the global nextRequestingView variable.
+  if (viewAnimatingFlag) {
+    nextRequestingView = viewNum;
+    // console.log('Blocked -> A VIEW IS ANIMATING: ', currViewNum);
+    return;
+  }
+
+  // Conditional blocks to trigger animation of the requested view in case it passes it all the checks.
   if (viewNum == 0) {
     animateView0();
   } else if (viewNum == 1) {
@@ -456,35 +503,62 @@ let switchAnimation = () => {
   } else if (viewNum == 4) {
     animateView4();
   }
+
+  // Updates currViewNum with the view that has been requested to animate.
+  currViewNum = viewNum;
 };
 
-// setInterval(() => {
-//   document.getElementById("next-view").click();
-// }, 4000);
-
-let listenScroll = () => {
-  if (scrollPercent > 0 && scrollPercent < 15 && viewNum != 0) {
+//
+// FUNCTION RESPONSIBLE FOR TRIGGERING A REQUEST (switchAnimationRequest) BASED ON THE CURRENT SCROLL-PERCENT (Called from scroll eventListener func.)
+//
+let listenScroll = (scrollPercent) => {
+  let viewNum;
+  // currViewNum proactively checks if the scroll has been made in the current animated view. 
+  if (scrollPercent > 0 && scrollPercent < 15 && currViewNum != 0) {
     viewNum = 0;
-    switchAnimation();
-  } else if (scrollPercent > 20 && scrollPercent < 35 && viewNum != 1) {
+    switchAnimationRequest(viewNum);
+  } else if (scrollPercent > 20 && scrollPercent < 35 && currViewNum != 1) {
     viewNum = 1;
-    switchAnimation();
-  } else if (scrollPercent > 45 && scrollPercent < 60 && viewNum != 2) {
+    switchAnimationRequest(viewNum);
+  } else if (scrollPercent > 45 && scrollPercent < 60 && currViewNum != 2) {
     viewNum = 2;
-    switchAnimation();
-  } else if (scrollPercent > 60 && scrollPercent < 80 && viewNum != 3) {
+    switchAnimationRequest(viewNum);
+  } else if (scrollPercent > 60 && scrollPercent < 80 && currViewNum != 3) {
     viewNum = 3;
-    switchAnimation();
-  } else if (scrollPercent > 85 && scrollPercent < 100 && viewNum != 4) {
+    switchAnimationRequest(viewNum);
+  } else if (scrollPercent > 85 && scrollPercent < 100 && currViewNum != 4) {
     viewNum = 4;
-    switchAnimation();
+    switchAnimationRequest(viewNum);
   }
 };
-
-setInterval(() => {
-  listenScroll();
-}, 500);
 
 
 window.scrollTo({ top: 0, behavior: 'smooth' })
 animate();
+//
+//
+//
+//
+//
+//
+//
+//
+//
+// setInterval(() => {
+//   listenScroll(scrollPercent)
+// }, 500)
+
+// let viewNum = 0;
+// document.getElementById("next-view").addEventListener("click", (e) => {
+//   viewNum = (viewNum + 1) % 5;
+//   switchAnimation();
+// });
+
+// document.getElementById("prev-view").addEventListener("click", (e) => {
+//   viewNum = viewNum > 0 ? Math.abs((viewNum - 1) % 5) : -1;
+//   if (viewNum != -1) {
+//     switchAnimation();
+//   } else {
+//     viewNum = 0;
+//   }
+// });

@@ -6,7 +6,7 @@
 body {
   /* background: linear-gradient(to left, #219c84 0%, #b37fcf 50%, #ac68d1 100%); */
   /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  font-family: "Arial";
+  font-family:Arial, Helvetica, sans-serif;
   background: linear-gradient(to left, #ff3cac 0%, #784ba0 50%, #2b86c5 100%);
 }
 
@@ -47,8 +47,8 @@ body {
   color: black;
   background: linear-gradient(
     to right bottom,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.3)
+    rgba(255, 255, 255, 0.59),
+    rgba(255, 224, 224, 0.3)
   );
 
   backdrop-filter: blur(1em);
